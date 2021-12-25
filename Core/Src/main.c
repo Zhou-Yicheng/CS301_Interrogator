@@ -22,7 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "lcd.h"
+#include "cow.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,7 +72,53 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+static void question_mode(char content[],int point,int time_left){
+	POINT_COLOR = BLACK;
+	char msg[30];
 
+	LCD_ShowString(10, 10, 200, 24, 24, "Question:");
+	sprintf(msg, content);
+	LCD_ShowString(40, 40, 200, 24, 24, msg);
+
+	sprintf(msg, "Point:%d",point);
+	LCD_ShowString(10, 70, 200, 24, 24, msg);
+
+	sprintf(msg, "Time left: %d s",time_left);
+	LCD_ShowString(10, 100, 200, 24, 24, msg);
+}
+
+static void answer_received_mode(int score){
+	char msg[30];
+	if(score){
+		POINT_COLOR = GREEN;
+		LCD_ShowString(80, 180, 200, 24, 24, "Right!");
+		sprintf(msg, "You get %d points",score);
+		LCD_ShowString(10, 210, 200, 24, 24, msg);
+	}else{
+		POINT_COLOR = RED;
+		LCD_ShowString(80, 180, 200, 24, 24, "Wrong!");
+		sprintf(msg, "You get %d points",score);
+		LCD_ShowString(10, 210, 200, 24, 24, msg);
+		LCD_ShowString(10, 240, 200, 24, 24, "Try again");
+	}
+
+}
+
+//@parameter next : 0 for over ,1 for continue
+
+static void judge_mode(int total_score,int next){
+	char msg[30];
+	POINT_COLOR = BLACK;
+	if(next){
+		LCD_ShowString(10, 10, 200, 24, 24, "Continue");
+	}else{
+		LCD_ShowString(10, 10, 200, 24, 24, "Over");
+	}
+	sprintf(msg, "Total points: %d",total_score);
+	LCD_ShowString(10, 40, 200, 24, 24, msg);
+	LCD_Color_Fill(1,101,200,200,cow_color); //指定区域填充色块（color为色块数组）
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -113,6 +160,7 @@ int main(void)
 
   USART1_RX_STA=0;
   USART2_RX_STA=0;
+  LCD_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -140,6 +188,13 @@ int main(void)
 
 		  USART2_RX_STA = 0;
 	  }
+
+//	  char content[30];
+//	  sprintf(content, "1+1");
+//	  question_mode(content,4,15);
+//	  answer_received_mode(1);
+	  judge_mode(30,0);
+
   }
   /* USER CODE END 3 */
 }

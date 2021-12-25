@@ -64,8 +64,8 @@ all: main-build
 main-build: project.elf secondary-outputs
 
 # Tool invocations
-project.elf: $(OBJS) $(USER_OBJS) /home/chen/STM32Cube/workspace_1.7.0/project/STM32F103RCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/home/chen/STM32Cube/workspace_1.7.0/project/STM32F103RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="project.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+project.elf: $(OBJS) $(USER_OBJS) C:\Users\ywhf\Desktop\embed_project\CS301_Interrogator\STM32F103RCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\ywhf\Desktop\embed_project\CS301_Interrogator\STM32F103RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="project.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
