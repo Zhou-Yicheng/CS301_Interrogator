@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "lcd.h"
-#include "cow.h"
+#include "rose.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,51 +72,75 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static void question_mode(char content[],int point,int time_left){
+static void question_mode(u8 content[],u8 point[],u8 time_left[],u8 score[]){
 	POINT_COLOR = BLACK;
-	char msg[30];
+	u8 msg[30];
+
+//	sprintf(msg, "content:%s \r\n",content);
+//	HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+//	sprintf(msg, "point:%s \r\n",point);
+//	HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+//	sprintf(msg, "time_left:%s \r\n",time_left);
+//	HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+//	sprintf(msg, "score:%s \r\n",score);
+//	HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
 
 	LCD_ShowString(10, 10, 200, 24, 24, "Question:");
-	sprintf(msg, content);
-	LCD_ShowString(40, 40, 200, 24, 24, msg);
+	LCD_ShowString(40, 40, 200, 24, 24, content);
 
-	sprintf(msg, "Point:%d",point);
+	sprintf(msg, "Point:%s",point);
 	LCD_ShowString(10, 70, 200, 24, 24, msg);
 
-	sprintf(msg, "Time left: %d s",time_left);
+	sprintf(msg, "Time left: %s s",time_left);
 	LCD_ShowString(10, 100, 200, 24, 24, msg);
-}
 
-static void answer_received_mode(int score){
-	char msg[30];
-	if(score){
-		POINT_COLOR = GREEN;
-		LCD_ShowString(80, 180, 200, 24, 24, "Right!");
-		sprintf(msg, "You get %d points",score);
-		LCD_ShowString(10, 210, 200, 24, 24, msg);
-	}else{
+	if(time_left[0]=='0'){
 		POINT_COLOR = RED;
-		LCD_ShowString(80, 180, 200, 24, 24, "Wrong!");
-		sprintf(msg, "You get %d points",score);
-		LCD_ShowString(10, 210, 200, 24, 24, msg);
-		LCD_ShowString(10, 240, 200, 24, 24, "Try again");
+		LCD_ShowString(10, 180, 200, 24, 24, "Time is up!");
+
+	}else{
+		if(score[0]=='-'){
+				//do nothing
+			}else if(score[0]=='0'){
+				POINT_COLOR = RED;
+				LCD_ShowString(80, 180, 200, 24, 24, "Wrong!");
+				sprintf(msg, "You get %s points",score);
+				LCD_ShowString(10, 210, 200, 24, 24, msg);
+				LCD_ShowString(10, 240, 200, 24, 24, "Try again");
+			}else{
+				POINT_COLOR = GREEN;
+				LCD_ShowString(80, 180, 200, 24, 24, "Right!");
+				sprintf(msg, "You get %s points",score);
+				LCD_ShowString(10, 210, 200, 24, 24, msg);
+			}
 	}
 
+
 }
+
+//static void answer_received_mode(int score){
+//	char msg[30];
+//
+//}
 
 //@parameter next : 0 for over ,1 for continue
 
-static void judge_mode(int total_score,int next){
-	char msg[30];
+static void judge_mode(u8 total_score[],u8 next){
+	u8 msg[30];
 	POINT_COLOR = BLACK;
-	if(next){
-		LCD_ShowString(10, 10, 200, 24, 24, "Continue");
+//				  sprintf(msg, "total_point:%s \r\n",total_score);
+//				  HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+//				  sprintf(msg, "next:%c \r\n",next);
+//				  HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+	if(next=='0'){
+		LCD_ShowString(10, 10, 200, 24, 24, "Game over!");
+		LCD_Color_Fill(1,101,200,200,rose_color); //指定区域填充色块（color为色块数组）
 	}else{
-		LCD_ShowString(10, 10, 200, 24, 24, "Over");
+		LCD_ShowString(10, 10, 200, 24, 24, "Continue!");
 	}
-	sprintf(msg, "Total points: %d",total_score);
+
+	sprintf(msg, "Total points: %s",total_score);
 	LCD_ShowString(10, 40, 200, 24, 24, msg);
-	LCD_Color_Fill(1,101,200,200,cow_color); //指定区域填充色块（color为色块数组）
 
 }
 /* USER CODE END 0 */
@@ -186,14 +210,93 @@ int main(void)
 
 		  HAL_UART_Transmit(&huart1, USART2_RX_BUF, USART2_RX_STA, HAL_MAX_DELAY);
 
+		  LCD_Clear(WHITE);
+		  if(USART2_RX_BUF[0]=='1'){
+			  int index = 2;
+			  u8 content[30];
+			  int content_index = 0;
+			  while(1){
+				  if(USART2_RX_BUF[index]!=';'){
+					  content[content_index++] = USART2_RX_BUF[index++];
+				  }else{
+					  index++;
+					  content[content_index] = '\0';
+					  break;
+				  }
+			  }
+			  u8 point[30];
+			  int point_index = 0;
+			  while(1){
+				  if(USART2_RX_BUF[index]!=';'){
+					  point[point_index++] = USART2_RX_BUF[index++];
+				  }else{
+					  index++;
+					  point[point_index] = '\0';
+					  break;
+				  }
+			  }
+			  u8 time_left[30];
+			  int time_index = 0;
+			  while(1){
+				  if(USART2_RX_BUF[index]!=';'){
+					  time_left[time_index++] = USART2_RX_BUF[index++];
+				  }else{
+					  index++;
+					  time_left[time_index] = '\0';
+					  break;
+				  }
+			  }
+			  u8 score[30];
+			  int score_index = 0;
+			  while(1){
+				  if(USART2_RX_BUF[index]!=';'){
+					  score[score_index++] = USART2_RX_BUF[index++];
+				  }else{
+					  index++;
+					  score[score_index] = '\0';
+					  break;
+				  }
+			  }
+
+//			  u8 msg[30];
+//
+//			  	sprintf(msg, "_content:%s \r\n",content);
+//			  	HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+//			  	sprintf(msg, "_point:%s \r\n",point);
+//			  	HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+//			  	sprintf(msg, "_time_left:%s \r\n",time_left);
+//			  	HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+//			  	sprintf(msg, "_score:%s \r\n",score);
+//			  	HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+			  question_mode(content,point,time_left,score);
+		  }else if(USART2_RX_BUF[0]=='3'){
+			  int index = 2;
+			  u8 total_point[30];
+			  int total_index = 0;
+			  while(1){
+				  if(USART2_RX_BUF[index]!=';'){
+					  total_point[total_index++] = USART2_RX_BUF[index++];
+				  }else{
+					  index++;
+					  total_point[total_index] = '\0';
+					  break;
+				  }
+			  }
+
+//			  u8 msg[30];
+//			  sprintf(msg, "_total_point:%s \r\n",total_point);
+//			  HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+//			  sprintf(msg, "_next:%c \r\n",USART2_RX_BUF[index]);
+//			  HAL_UART_Transmit(&huart1, msg, strlen(msg), 0xffff);
+
+			  judge_mode(total_point,USART2_RX_BUF[index]);
+		  }else{
+			  //do nothing, cause data are not recognizable
+		  }
+
 		  USART2_RX_STA = 0;
 	  }
 
-//	  char content[30];
-//	  sprintf(content, "1+1");
-//	  question_mode(content,4,15);
-//	  answer_received_mode(1);
-	  judge_mode(30,0);
 
   }
   /* USER CODE END 3 */
