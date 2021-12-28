@@ -35,6 +35,7 @@
 方法2需要编写串口和蓝牙两部分的逻辑：比如usart1是电脑和板子之间的串口、usart2是蓝牙和板子之间的串口  
 首先从usart1读取电脑发来的AT指令 板子将AT指令转发给usart2  
 然后读取usart2的回复 再由板子发回给usart1 这样电脑就会收到蓝牙的回复  
+可以看看[main.c](https://github.com/Zhou-Yicheng/CS301_Interrogator/blob/main/Core/Src/main.c#L537)的 `void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)`
 
 ### 注意事项
 
